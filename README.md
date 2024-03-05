@@ -5,6 +5,7 @@ graphviz, networkx
 ```sh
 $ pip install -r requirements.txt
 ```
+## 実行方法
 ```sh
 $ analyzer.py ${analyze_dir}
 ```
