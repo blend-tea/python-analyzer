@@ -93,7 +93,10 @@ def extract_imp(fdata:str, filepath) -> list: # [[file1, [import1, import2]], [f
         elif isinstance(node, ast.ImportFrom):
             module = node.module
             for alias in node.names:
-                imp = module.replace(".", "/")
+                if module is not None:
+                    imp = module.replace(".", "/")
+                else:
+                    imp = ""
                 dir = os.path.dirname(filepath)
                 if(os.path.isfile(dir + "/" + imp + ".py")):
                     ret.append([dir + "/" + imp + ".py", [alias.name]])
