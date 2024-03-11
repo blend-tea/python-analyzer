@@ -6,16 +6,19 @@ import graph
 DIRECTORY_PATH = ""
 SCOPE_FILE:str
 FILE_PATH_LIST = set()
+MODULE_FLAG = True
 
 def main():
-    global DIRECTORY_PATH, SCOPE_FILE
+    global DIRECTORY_PATH, SCOPE_FILE, MODULE_FLAG
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument('directory_path', type=str)
         parser.add_argument('-f', '--file', type=str)
+        parser.add_argument('--nomodule', action='store_false', default=True)
         args = parser.parse_args()
         DIRECTORY_PATH = args.directory_path
         SCOPE_FILE = args.file
+        MODULE_FLAG = args.nomodule
     except:
         print("Argument error")
         exit()
@@ -97,7 +100,7 @@ def extract_imp(fdata:str, filepath) -> list: # [[file1, [import1, import2]], [f
                             flag = False
                             break
                         m = re.findall(r'(.*/).*', dir)
-                    if flag:
+                    if flag and MODULE_FLAG:
                         ret.append([alias.name, []])
         elif isinstance(node, ast.ImportFrom):
             module = node.module
@@ -129,7 +132,7 @@ def extract_imp(fdata:str, filepath) -> list: # [[file1, [import1, import2]], [f
                             flag = False
                             break
                         m = re.findall(r'(.*/).*', dir)
-                    if flag:
+                    if flag and MODULE_FLAG:
                         ret.append([alias.name, [alias.name]])
     return ret
 
