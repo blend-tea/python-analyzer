@@ -1,20 +1,29 @@
 import sys, os, re, ast
+import argparse
 from multiprocessing import Pool
 import graph
 
-DIRECTORY_PATH:str
+DIRECTORY_PATH = ""
+SCOPE_FILE:str
 FILE_PATH_LIST = set()
 
 def main():
-    global DIRECTORY_PATH
+    global DIRECTORY_PATH, SCOPE_FILE
     try:
-        DIRECTORY_PATH = sys.argv[1]
+        parser = argparse.ArgumentParser()
+        parser.add_argument('directory_path', type=str)
+        parser.add_argument('-f', '--file', type=str)
+        args = parser.parse_args()
+        DIRECTORY_PATH = args.directory_path
+        SCOPE_FILE = args.file
     except:
         print("Argument error")
         exit()
     if os.path.isdir(DIRECTORY_PATH):
         filepath = find_files_by_ext(DIRECTORY_PATH, "py")
         inp = mproc_file_analyzar(filepath)
+        if SCOPE_FILE is not None:
+            inp = parse_analyzed_list(inp, SCOPE_FILE)
         graph.main(inp)
     else:
         print("directory error\nno such directory")
@@ -122,6 +131,26 @@ def extract_imp(fdata:str, filepath) -> list: # [[file1, [import1, import2]], [f
                         m = re.findall(r'(.*/).*', dir)
                     if flag:
                         ret.append([alias.name, [alias.name]])
+    return ret
+
+
+
+def parse_analyzed_list(analyzed_list: list, scope: str):
+    ret = []
+    targets = set()
+    for analyzed in analyzed_list:
+        # add scope file
+        if analyzed[0] == scope:
+            ret.append(analyzed)
+        else:
+            for imports in analyzed[1]:
+                if imports[0] == scope:
+                    ret.append(analyzed)
+                    targets.add(analyzed[0])
+    for analyzed in analyzed_list:
+        if analyzed[0] in targets:
+            ret.append(analyzed)
+    print(*ret, sep="\n")
     return ret
 
 
